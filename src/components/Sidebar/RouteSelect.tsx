@@ -13,10 +13,18 @@ export const RouteSelect = () => {
         navigate("/login");
     }
 
+    function PedidoImporte(){
+        navigate("/Importe");
+    }
+
+    function GoToHome(){
+        navigate("/Home");
+    }
+
     return (
         <div className='space-y-1'>
-            <Route Icon={FiHome} selected={true} title="Resumo" />
-            <Route Icon={AiOutlineImport } selected={false} title="Importar Pedido" />
+            <Route Icon={FiHome} selected={false} title="Resumo" onClick={GoToHome} />
+            <Route Icon={AiOutlineImport } selected={false} title="Importar Pedido" onClick={PedidoImporte} />
             <Route Icon={AiOutlineLogout } selected={false} title="Sair" onClick={SingOut} />
         </div>
     );

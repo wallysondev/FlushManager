@@ -2,34 +2,53 @@ import {React, useState} from 'react'
 import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo-shopodonto.svg';
 import './style.css';
+import { AlertHiFire } from '../../components/Toast/AlertHiFire';
 
 import Api from '../../services/api'
 
 function Login() {
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const navigate = useNavigate();
 
   async function SubmitOK(){
-    try{
-      const response = await Api.get(`/Token?username=${username}&password=${password}`);
-      
-      // Armazena o token
-      localStorage.setItem('token', response.data.token);
-      
-      // redireciona o usuario
-      navigate('/home');
-      
-    }catch(error){
-      console.error('Erro ao fazer login:', error);
+  try {
+    const response = await Api.get(`/Token?username=${username}&password=${password}`);
+
+    // Verifica se veio token no response
+    if (!response.data.token) {
+      // Insere no alerta de mensagem 
+      ShowMessage(true, "Não foi possivel realizar o login.");
+      return;
     }
+
+    // Armazena o token
+    localStorage.setItem('token', response.data.token);
+
+    // Redireciona o usuário
+    navigate('/home');
+
+    } catch (error) {
+      if (error.response) {
+        var data = error.response.data;
+        ShowMessage(true, data.message)
+      }
+    }
+  }
+
+  function ShowMessage(isVisible, texto) {
+    setAlertMessage(texto);
+    setShowAlert(isVisible);
   }
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Painel de Acesso</h2>
-        
+        {showAlert && <AlertHiFire description={alertMessage} />}
         <form className="space-y-4" onSubmit={e => {e.preventDefault(); SubmitOK(); }}>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nome de usuario</label>

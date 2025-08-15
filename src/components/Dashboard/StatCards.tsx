@@ -1,6 +1,7 @@
 import React from 'react'
 
 export const StatCards = () => {
+  
   return (
     <>
       <div className='col-span-12'>
@@ -16,29 +17,23 @@ export const StatCards = () => {
         </p>
       </div>
 
-      <Card title='Orçamentos' value='0' pilltext='Em pedidos' color='bg-green-300'/>
-      <Card title='Orçamentos' value='0' pilltext='Em andamento' color='bg-orange-300'/>
-      <Card title='Orçamentos' value='0' pilltext='Cancelados' color='bg-red-300'/>
-      <Card title='Orçamentos' value='0' pilltext='Digitados' color='bg-neutral-300' />
+      <Card title='Orçamentos' value='0' pilltext='Em pedidos' color='bg-sky-500'/>
+      <Card title='Orçamentos' value='0' pilltext='Vencidos' color='bg-red-500'/>
+      <Card title='Orçamentos' value='0' pilltext='Faturados' color='bg-green-500'/>
+      <Card title='Orçamentos' value='0' pilltext='Digitados' color='bg-neutral-300' pillcolor='text-stone-600' />
     </>
   )
 }
 
-const Card = ({title, value, pilltext, color,}: {
-    title: string;
-    value: string;
-    pilltext: string;
-    color: string;
-}) => {
-    return <div className= {`col-span-3 p-5 rounded ${color}`}>
-      <div className='flex mb-8 items-start justify-between'>
-        <div>
-          <h3 className='text-shadow-2xs text-stone-50 font-bold text-sm'>{title}</h3>
-          <h5 className='text-shadow-2xs text-[30px] text-stone-50 font-semibold'>{pilltext}</h5>
-          <p className='text-shadow-2xs text-[50px] text-stone-50 align-center font-semibold'>{value}</p>
-        </div>
-
+const Card = ({title, value, pilltext, color, pillcolor} : { title: string; value: string; pilltext: string; color: string; pillcolor?: string;}) => {
+  return <div className= {`col-span-3 p-5 rounded ${color}`}>
+    <div className='flex mb-8 items-start justify-between'>
+      <div>
+        <h3 className={`text-shadow-2xs ${pillcolor || 'text-stone-50'} font-bold text-sm`}>{title}</h3>
+        <h5 className={`text-shadow-2xs text-[30px] ${pillcolor || 'text-stone-50'} font-semibold`}>{pilltext}</h5>
+        <p className={`text-shadow-2xs text-[50px] ${pillcolor || 'text-stone-50'} align-center font-semibold`}>{value}</p>
       </div>
 
     </div>
+  </div>
 }

@@ -1,23 +1,46 @@
 import React from 'react'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import Importe from './pages/Importe'
+import VisualizarOrcamento from './pages/Visualizar';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import ProtectedRoute from './components/ProtectedRoute';
 
 const router = createBrowserRouter([
     {
-        path:'/',
-        element: <div><Login /></div>
+        path: '/',
+        element: <Login />
     },
     {
-        path:'/Home',
-        element: <div><Home /></div>
+        path: '/Home',
+        element: (
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        )
     },
     {
-        path:'*',
-        element: <div><Login /></div>
+        path: '/Importe',
+        element: (
+          <ProtectedRoute>
+            <Importe />
+          </ProtectedRoute>
+        )
+    },
+    {
+        path: '/Visualizar/:numorca',
+        element: (
+          <ProtectedRoute>
+            <VisualizarOrcamento />
+          </ProtectedRoute>
+        )
+    },
+    {
+        path: '*',
+        element: <Login />
     }
-])
+]);
 
 const App = () => {
   return (
