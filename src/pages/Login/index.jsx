@@ -16,7 +16,15 @@ function Login() {
 
   async function SubmitOK(){
   try {
-    const response = await Api.get(`/Token?username=${username}&password=${password}`);
+    const dados = {
+      nome: username,
+      password: password
+    }
+    
+    // Checa se existe dados
+    if (!username) return;
+
+    const response = await Api.post(`/Token`, dados, {headers: {'Content-Type': 'application/json'}});
 
     // Verifica se veio token no response
     if (!response.data.token) {

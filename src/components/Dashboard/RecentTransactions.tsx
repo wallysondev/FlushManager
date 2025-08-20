@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { UNSAFE_getPatchRoutesOnNavigationFunction, useNavigate } from 'react-router-dom';
 import { DropdownOpcoes } from '../Dashboard/DropdownOpcoes';
 import { Search } from './Search';
 import { DateFilter } from './DateFilter';
@@ -68,7 +68,6 @@ export const RecentTransactions = () => {
     return searchMatch && dateMatch;
   });
 
-
   function formatDate(dateString: string) {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, '0');
@@ -109,6 +108,7 @@ export const RecentTransactions = () => {
                 dtultcompra={formatDate(item.dtulpedido)}
                 dtultorcamento={formatDate(item.data)}
                 status={item.posicao}
+                andamento = {item.aprovado}
               />
             ))
           ) : (
@@ -140,7 +140,7 @@ const TableHead = () => (
   </thead>
 );
 
-const TableRow = ({ numorca, cliente, cgc, uf, valor, dtultcompra, dtultorcamento, status }) => {
+const TableRow = ({ numorca, cliente, cgc, uf, valor, dtultcompra, dtultorcamento, status, andamento }) => {
   const getSigla = (nome) => {
     const partes = nome.trim().split(" ");
     return (partes[0]?.[0] || "") + (partes[1]?.[0] || "");
@@ -158,13 +158,18 @@ const TableRow = ({ numorca, cliente, cgc, uf, valor, dtultcompra, dtultorcament
     }
   };
 
-  const getStatusColor = (status) => {
+  const getAprovado = (status) => {
     switch (status) {
-      case "A": return "bg-emerald-600 hover:bg-slate-500";
-      case "R": return "bg-rose-600 hover:bg-violet-500";
-      default: return "bg-gray-400 hover:bg-gray-500";
+      case "A":
+        return { label: "Aprovado", color: "bg-emerald-500" };
+      case "R":
+        return { label: "Reprovado", color: "bg-red-500" };
+      default:
+        return { label: "Pendente", color: "bg-gray-400" };
     }
-  };
+  }
+
+  const isandamento = getAprovado(andamento);
 
   return (
     <tr className="text-sm text-gray-700">
@@ -192,8 +197,8 @@ const TableRow = ({ numorca, cliente, cgc, uf, valor, dtultcompra, dtultorcament
         </button>
       </td>
       <td className="p-4">
-        <button className={`flex items-center gap-2 py-1 px-2 rounded-full text-white font-medium ${getStatusColor("A")}`}>
-          Aprovado
+        <button className={`flex items-center gap-2 py-1 px-2 rounded-full text-white font-medium ${isandamento.color}`}>
+          {isandamento.label}
         </button>
       </td>
       <td className="w-8">
