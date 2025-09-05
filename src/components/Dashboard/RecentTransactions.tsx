@@ -35,7 +35,7 @@ export const RecentTransactions = () => {
     async function fetchData() {
       try {
         setLoading(true);
-        const response = await Api.get(`/Orcamento?codusur=${codusur}`, {
+        const response = await Api.get(`/Orcamento`, {
           params: { codusur },
           headers: { Authorization: `Bearer ${token}` }
         });
