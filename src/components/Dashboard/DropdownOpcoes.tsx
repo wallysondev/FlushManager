@@ -26,7 +26,7 @@ export function DropdownOpcoes({ numorca }) {
   }
 
   function handleLink() {
-    const novoLink = `${window.location.origin}/orcamento/${numorca}`;
+    const novoLink = `${window.location.origin}/Visualizar/${numorca}`;
     setLink(novoLink);
     setModalOpen(true);
     setOpen(false);

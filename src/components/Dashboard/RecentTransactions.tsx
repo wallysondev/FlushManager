@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { UNSAFE_getPatchRoutesOnNavigationFunction, useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { DropdownOpcoes } from '../Dashboard/DropdownOpcoes';
 import { Search } from './Search';
 import { DateFilter } from './DateFilter';
@@ -23,9 +23,9 @@ export const RecentTransactions = () => {
   const [endDate, setEndDate] = useState(today.toISOString().split("T")[0]);
 
   const token = localStorage.getItem('token');
+
   if (!token) {
-    navigate('/login');
-    return null;
+      return <Navigate to="/Login" replace />;
   }
 
   const decodedToken = jwtDecode(token);

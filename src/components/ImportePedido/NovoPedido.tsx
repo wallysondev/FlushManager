@@ -56,14 +56,16 @@ export const NovoPedido = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Numero do Orçamento</label>
             <input 
-              type="number" 
+              type="text" 
+              inputMode="numeric"   // abre teclado numérico em mobile
+              pattern="[0-9]*"      // força só números
               value={numorca}
-              onChange={e => setNumorca(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-              placeholder="Digite todos os numeros"
+              onChange={e => setNumorca(e.target.value.replace(/\D/, ""))} // remove não números
+              className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all"
+              placeholder="Digite todos os números"
             />
           </div>
-          <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition-colors" type='submit'>
+          <button className="w-full bg-sky-600 hover:bg-sky-700 text-white font-medium py-2.5 transition-colors" type='submit'>
             Importar
           </button>
         </form>
