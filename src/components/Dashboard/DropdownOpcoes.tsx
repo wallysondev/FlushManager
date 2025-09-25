@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiMoreHorizontal } from 'react-icons/fi';
+import { SCREENS } from '../../utils/Permissoes';
+import Api from '../../services/api';
+import { jwtDecode } from 'jwt-decode';
 
 export function DropdownOpcoes({ numorca }) {
   const [open, setOpen] = useState(false);
@@ -8,6 +11,47 @@ export function DropdownOpcoes({ numorca }) {
   const [link, setLink] = useState('');
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+
+  const [rolePermissao, setRolePermissao] = useState([]);
+
+  // Carregar todos os perfis
+  useEffect(() => {
+    const carregarRoles = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token não encontrado, faça login.');
+
+        // Rota de perfis da API
+        const resRoles = await Api.get('/Roles', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // Filtrando somente os perfis que estão ativos na rota.
+        const perfisAtivos = resRoles.data.perfis.filter(p => p.status === 'A');
+        
+        // Pega qual a role do usuario que esta no token
+        const decodedToken = jwtDecode(token);
+
+        // Atualiza os estados com os dados do token
+        const perfildefault = perfisAtivos.find(p => p.role === decodedToken.role);
+
+        // consulta as permissoes disponiveis do usuario
+        const resRolePerm = await Api.post(`/RolePermissao`, 
+          { rolename: perfildefault.role }, // corpo da requisição
+          { headers: { Authorization: `Bearer ${token}` } } // headers
+        );
+
+        // Retorna todas as permissões do perfil do usuario
+        const dataRolePerm = resRolePerm.data.permissoes;
+
+        // Seta todas as permissões da role do usuario.
+        setRolePermissao(dataRolePerm);
+      } catch (error) {
+        console.error('Erro ao carregar perfis:', error);
+      }
+    };
+    carregarRoles();
+  }, []);
 
   // Fecha dropdown se clicar fora
   useEffect(() => {
@@ -26,7 +70,7 @@ export function DropdownOpcoes({ numorca }) {
   }
 
   function handleLink() {
-    const novoLink = `${window.location.origin}/Visualizar/${numorca}`;
+    const novoLink = `${window.location.origin}/Detalhes/${numorca}`;
     setLink(novoLink);
     setModalOpen(true);
     setOpen(false);
@@ -34,7 +78,16 @@ export function DropdownOpcoes({ numorca }) {
 
   function copiarLink() {
     navigator.clipboard.writeText(link);
-    alert('Link copiado para a área de transferência!');
+    setModalOpen(false);
+    setOpen(false);
+  }
+
+  function handleEnviar() {
+
+  }
+
+  function handleImprimir() {
+
   }
 
   return (
@@ -48,10 +101,12 @@ export function DropdownOpcoes({ numorca }) {
         <FiMoreHorizontal />
       </button>
 
-{open && (
-        <div className="absolute right-0 w-20 rounded-md shadow-lg bg-white z-20">
-            <button onClick={handleVisualizar} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" >Ver</button>
-            <button onClick={handleLink} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Link</button>
+      {open && (
+        <div className="absolute  w-20 rounded-md shadow-lg bg-white z-20">
+            {rolePermissao.find(p => p.permissao === SCREENS.VISUALIZARDETALHESORCA && p.status === 'A') && (<button onClick={handleVisualizar} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Detalhes</button>)}
+            {rolePermissao.find(p => p.permissao === SCREENS.IMPRIMIRORCAMENTO && p.status === 'A') && (<button onClick={handleImprimir} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Imprimir</button>)}
+            {rolePermissao.find(p => p.permissao === SCREENS.ENVIARORCPOREMAIL && p.status === 'A') && (<button onClick={handleEnviar} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Enviar</button>)}
+            {rolePermissao.find(p => p.permissao === SCREENS.GERARLINKDEORCAMENTO && p.status === 'A') && (<button onClick={handleLink} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Link</button>)}
         </div>
       )}
 

@@ -11,7 +11,7 @@ function Permissao() {
   const [perfilPermissao, setPerfilPermissao] = useState([]);
 
   const [roles, setRoles] = useState([]);
-  const [hasPermissao, setHasPermissao] = useState(null);
+  const [isPermissao, setIsPermissao] = useState([]);
 
   const [roleSelecionada, setRoleSelecionada] = useState(null);
   const [logado, setLogado] = useState(null);
@@ -38,7 +38,7 @@ function Permissao() {
         // Pega qual a role do usuario que esta no token
         const decodedToken = jwtDecode(token);
 
-        // Atualiza os estados com os dados do token
+        // Compara os perfis com o perfil do token
         const perfildefault = perfisAtivos.find(p => p.role === decodedToken.role);
         setLogado(perfildefault);
 
@@ -48,20 +48,12 @@ function Permissao() {
           { headers: { Authorization: `Bearer ${token}` } } // headers
         );
 
-        // tras só as permissoes
+        // tras só as permissoes do perfil do usuario
         const dataRolePerm = resRolePerm.data.permissoes;
-
-        // Verifica se o usuario tem permissão de ver o combobox dos perfis
-        const hasValid = dataRolePerm.find(p => p.permissao === SCREENS.ALTERARPERMISSAOPERFIL && p.status === 'A');
-        if (hasValid) {
-          setHasPermissao(true);
-          // pode trocar de role → começa já no perfil do token
-          if (perfisAtivos.length > 0) setRoleSelecionada(perfildefault); 
-        } else {
-          setHasPermissao(false);
-          // não tem permissão → trava no perfil logado
-          setRoleSelecionada(perfildefault);
-        }
+        if (dataRolePerm.length > 0) setIsPermissao(dataRolePerm);
+      
+        // pode trocar de role → começa já no perfil do token
+        if (perfisAtivos.length > 0) setRoleSelecionada(perfildefault); 
       } catch (error) {
         console.error('Erro ao carregar perfis:', error);
       }
@@ -161,14 +153,25 @@ function Permissao() {
   const coluna1 = permissoesPagina.slice(0, metade);
   const coluna2 = permissoesPagina.slice(metade);
 
+  // Validação de permissões
+  const isMesmoUsuario = roleSelecionada.role === logado.role;
+  
+  // Permissões quando for o próprio usuário
+  const podeAlterarProprio = isMesmoUsuario && isPermissao.some(r => r.permissao === SCREENS.ALTERARPERMISSAOATUAL && r.status === 'A');
+
+  // Permissões quando for outro perfil
+  const podeAlterarOutro = !isMesmoUsuario && isPermissao.some(r => r.permissao === SCREENS.ALTERARPERMISSAOPERFIL && r.status === 'A');
+
+  const podeAlterar = podeAlterarProprio || podeAlterarOutro;
+
   return (
     <main className="grid grid-cols-[220px_1fr] gap-4 p-4 h-screen">
       <Sidebar />
       <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
         <h2 className="text-lg font-semibold text-gray-700">Permissões de perfil</h2>
 
-        {/* Dropdown de perfis */}
-        {hasPermissao && (
+        {/* Verifica se o usuario tem permissão para alterar outro perfil */}
+        {isPermissao.find(p => p.permissao === SCREENS.ALTERARPERMISSAOPERFIL && p.status === 'A') && (
           <select
             className="p-2 border "
             value={roleSelecionada?.codigo || ''}
@@ -189,10 +192,10 @@ function Permissao() {
         {/* Grid de permissões */}
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            {coluna1.map(p => <ItemPermissao key={p.codigo} p={p} toggle={togglePermissao} />)}
+            {coluna1.map(p => <ItemPermissao key={p.codigo} p={p} toggle={togglePermissao}  canEdit={podeAlterar}/>)}
           </div>
           <div className="flex flex-col gap-2">
-            {coluna2.map(p => <ItemPermissao key={p.codigo} p={p} toggle={togglePermissao} />)}
+            {coluna2.map(p => <ItemPermissao key={p.codigo} p={p} toggle={togglePermissao} canEdit={podeAlterar} />)}
           </div>
         </div>
 
@@ -223,17 +226,19 @@ function Permissao() {
 
 export default Permissao;
 
-const ItemPermissao = ({ p, toggle }) => (
-  <div className="flex flex-col p-3 bg-gray-50 ">
-    <div className="flex items-center justify-between mb-1">
-      <span className="text-gray-700 text-sm">{p.descricao}</span>
-      <button
-        onClick={() => toggle(p.codigo)}
-        className={`relative inline-flex h-6 w-11 items-center transition-colors ${p.ativo ? "bg-sky-500" : "bg-gray-300"}`}
-      >
-        <span className={`inline-block h-4 w-4 transform bg-white transition-transform ${p.ativo ? "translate-x-6" : "translate-x-1"}`} />
-      </button>
+const ItemPermissao = ({ p, toggle, canEdit }) => {
+  return (
+    <div className="flex flex-col p-3 bg-gray-50 ">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-gray-700 text-sm">{p.descricao}</span>
+        <button
+          onClick={() => canEdit && toggle(p.codigo)}
+          className={`relative inline-flex h-6 w-11 items-center transition-colors ${p.ativo ? "bg-sky-500" : "bg-gray-300"}`}
+        >
+          <span className={`inline-block h-4 w-4 transform bg-white transition-transform ${p.ativo ? "translate-x-6" : "translate-x-1"}`} />
+        </button>
+      </div>
+      {p.ajuda && <p className="text-gray-500 text-xs mt-1">{p.ajuda}</p>}
     </div>
-    {p.ajuda && <p className="text-gray-500 text-xs mt-1">{p.ajuda}</p>}
-  </div>
-);
+  );
+};

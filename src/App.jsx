@@ -3,6 +3,10 @@ import { Navigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Importe from './pages/Importe'
+import Bancodepreco from './pages/Bancodepreco';
+import Arquivar from './pages/Arquivar';
+import Pendencias from './pages/Pendencias';
+
 import VisualizarOrcamento from './pages/Visualizar';
 import Perfil from './pages/Gerenciar/Perfil';
 import Permissao from './pages/Gerenciar/Permissao';
@@ -42,6 +46,30 @@ const router = createBrowserRouter([
       element: (
         <ProtectedRoute>
           <Importe />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: '/Bancodepreco',
+      element: (
+        <ProtectedRoute>
+          <Bancodepreco />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: '/Arquivar',
+      element: (
+        <ProtectedRoute>
+          <Arquivar />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: '/Pendencias',
+      element: (
+        <ProtectedRoute>
+          <Pendencias />
         </ProtectedRoute>
       )
     },

@@ -54,7 +54,7 @@ function Login() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+      <div className="max-w-sm w-full bg-white rounded-xl shadow-lg p-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Painel de Acesso</h2>
         {showAlert && <AlertHiFire description={alertMessage} />}
         <form className="space-y-4" onSubmit={e => {e.preventDefault(); SubmitOK(); }}>
@@ -82,7 +82,7 @@ function Login() {
 
           <div className="flex items-center justify-between">
             <label className="flex items-center">
-              <input type="checkbox" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"/>
+              <input type="checkbox" className=" border-gray-300 text-indigo-600 focus:ring-indigo-500"/>
               <span className="ml-2 text-sm text-gray-600">Lembrar-me</span>
             </label>
             <a href="#" className="text-sm text-indigo-600 hover:text-indigo-500">Esqueceu a senha?</a>

@@ -3,12 +3,12 @@ import { FiSearch } from 'react-icons/fi';
 
 export const Search = ({ value, onChange }) => {
     return (
-        <div className='bg-stone-100 mt-5 mx-3 relative rounded flex items-center px-2 py-1.5 text-sm'>
+        <div className='bg-gray-50 px-5 mb-3 relative rounded flex items-center text-sm'>
             <FiSearch className='mr-2' />
             <input
                 type='text'
                 placeholder='Pesquisar Orçamento'
-                className='w-full bg-transparent placeholder:text-stone-400 font-medium focus:outline-none'
+                className='w-full bg-transparent placeholder:text-stone-400 text-sm focus:outline-none'
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
             />

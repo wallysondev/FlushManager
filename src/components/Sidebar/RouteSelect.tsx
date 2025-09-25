@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { IconType } from 'react-icons';
-import { AiOutlineImport, AiOutlineLogout, AiOutlineAntDesign, AiOutlineSolution, AiOutlineSnippets   } from "react-icons/ai";
+import { AiFillTruck, AiOutlineUpload  , AiOutlineImport, AiOutlineLogout, AiOutlineAntDesign, AiOutlineSolution, AiOutlineSnippets, AiOutlineDollar    } from "react-icons/ai";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { FiHome } from 'react-icons/fi';
 import { jwtDecode } from 'jwt-decode';
@@ -74,8 +74,16 @@ export const RouteSelect = () => {
         navigate("/Home");
     }
 
-    function FileTransference(){
-        navigate("/Transferencia");
+    function GoToBancoPreco(){
+        navigate("/Bancodepreco");
+    }
+
+    function GoToArquivar(){
+        navigate("/Arquivar");
+    }
+
+    function GoToPendencias(){
+        navigate("/Pendencias");
     }
 
     return (
@@ -96,24 +104,24 @@ export const RouteSelect = () => {
                     isPermitted={canAccess(SCREENS.IMPORTARPEDIDOS)}
                 />
                 <Route 
-                    Icon={AiOutlineImport} 
-                    selected={location.pathname === "/BancoPreco"} 
+                    Icon={AiOutlineDollar } 
+                    selected={location.pathname === "/Bancodepreco"} 
                     title="Banco de Preços" 
-                    onClick={PedidoImporte} 
+                    onClick={GoToBancoPreco} 
                     isPermitted={canAccess(SCREENS.BANCODEPRECOS)}
                 />
                 <Route 
-                    Icon={AiOutlineImport} 
-                    selected={location.pathname === "/Transferencia"} 
-                    title="Importar Arquivos" 
-                    onClick={FileTransference} 
+                    Icon={AiOutlineUpload } 
+                    selected={location.pathname === "/Arquivar"} 
+                    title="Anexar Arquivos" 
+                    onClick={GoToArquivar} 
                     isPermitted={canAccess(SCREENS.ARQUIVAMENTO)}
                 />
                 <Route 
-                    Icon={AiOutlineImport} 
-                    selected={location.pathname === "/GestaoPendencia"} 
+                    Icon={AiFillTruck} 
+                    selected={location.pathname === "/Pendencias"} 
                     title="Gestão de Pendencias" 
-                    onClick={PedidoImporte} 
+                    onClick={GoToPendencias} 
                     isPermitted={canAccess(SCREENS.GESTAODEPENDENCIAS)}
                 />
                 <Route

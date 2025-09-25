@@ -1,7 +1,8 @@
-import React from 'react'
+import React from 'react';
+import { Sidebar } from '../../components/Sidebar/Sidebar';
 import './style.css';
 
-function Transferencia() {
+function Pendencias() {
   return (
     <main className="grid grid-cols-[220px_1fr] gap-4 p-4 h-screen">
       <Sidebar />
@@ -9,4 +10,4 @@ function Transferencia() {
   )
 }
 
-export default Transferencia
+export default Pendencias 

@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 
 import './style.css';
 import { Sidebar } from '../../../components/Sidebar/Sidebar';
+
+import { SCREENS } from '../../../utils/Permissoes';
 import Api from '../../../services/api';
+import { jwtDecode } from 'jwt-decode';
 
 function Perfil() {
   const [usuarios, setUsuarios] = useState([]);
@@ -45,7 +48,7 @@ function Perfil() {
     status: true,
   });
 
-const [matriculaImportar, setMatriculaImportar] = useState("");
+  const [matriculaImportar, setMatriculaImportar] = useState("");
 
   useEffect(() => {
     const GetUsuarios = async () => {
@@ -86,16 +89,156 @@ const [matriculaImportar, setMatriculaImportar] = useState("");
     GetUsuarios();
   }, []);
 
-  const handleDeletarUsuario = (id) => {
-    console.log("Deletando usuário com ID:", id);
-    // Aqui você pode chamar sua API ou lógica de exclusão
-    // Exemplo: await Api.delete(`/usuarios/${id}`);
+  // Variavel utilizada para gerenciar as permissoes do usuario
+  const [rolePermissao, setRolePermissao] = useState([]);
+
+  // Carregar todos os perfis
+  useEffect(() => {
+    const carregarRoles = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token não encontrado, faça login.');
+
+        // Rota de perfis da API
+        const resRoles = await Api.get('/Roles', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // Filtrando somente os perfis que estão ativos na rota.
+        const perfisAtivos = resRoles.data.perfis.filter(p => p.status === 'A');
+        
+        // Pega qual a role do usuario que esta no token
+        const decodedToken = jwtDecode(token);
+
+        // Atualiza os estados com os dados do token
+        const perfildefault = perfisAtivos.find(p => p.role === decodedToken.role);
+
+        // consulta as permissoes disponiveis do usuario
+        const resRolePerm = await Api.post(`/RolePermissao`, 
+          { rolename: perfildefault.role }, // corpo da requisição
+          { headers: { Authorization: `Bearer ${token}` } } // headers
+        );
+
+        // Retorna todas as permissões do perfil do usuario
+        const dataRolePerm = resRolePerm.data.permissoes;
+
+        // Seta todas as permissões da role do usuario.
+        setRolePermissao(dataRolePerm);
+      } catch (error) {
+        console.error('Erro ao carregar perfis:', error);
+      }
+    };
+    carregarRoles();
+  }, []);
+
+  const handleCadastrarUsuario = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Token não encontrado, faça login.");
+
+      const dados = {
+        nome: novoUsuario.nome,
+        password: novoUsuario.senha, // no backend é "password", não "senha"
+        email: novoUsuario.email,
+        rolecodigo: novoUsuario.rolecodigo,
+      };
+
+      const response = await Api.post("/Usuario", dados, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data.sucesso) {
+
+        console.log(response.data.usuario);
+        // Atualiza a lista de usuários em tela
+        setUsuarios((prev) => [...prev, response.data.usuario]);
+
+        console.log("Usuário cadastrado com sucesso:", response.data.mensagem);
+
+        // Fecha modal e limpa campos
+        setModalCadastrar(false);
+        setNovoUsuario({ nome: "", senha: "", email: "", rolecodigo: "" });
+      } else {
+        console.error("Erro ao cadastrar:", response.data.mensagem);
+      }
+    } catch (error) {
+      console.error("Erro ao cadastrar usuário:", error);
+    }
+  };
+
+  const handleDeletarUsuario = async () => {
+    if (!usuarioSelecionado?.matricula) {
+      console.error("Nenhum usuário selecionado para exclusão.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Token não encontrado, faça login.");
+
+      // Chamada DELETE passando a matrícula na URL
+      await Api.delete(`/Usuario/${usuarioSelecionado.matricula}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Atualiza o array de usuários (removendo o deletado)
+      setUsuarios((prevUsuarios) =>
+        prevUsuarios.filter((u) => u.matricula !== usuarioSelecionado.matricula)
+      );
+
+      // Fechar modal e limpar campos
+      setModalDeletar(false);
+      setNomeConfirmacao("");
+      setUsuarioSelecionado(null);
+    } catch (error) {
+      console.error("Erro ao deletar usuário:", error);
+    }
+  };
+
+  const handleUpdateUsuario = async () => {
+    const dados = {
+      matricula: usuarioSelecionado.matricula,
+      email: usuarioSelecionado.email,
+      rolecodigo: roleSelecionada?.codigo,
+      status: usuarioSelecionado.status
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Token não encontrado, faça login.');
+
+      const response = await Api.put(`/Usuario`, dados, { headers: {Authorization: `Bearer ${token}`} });
+      console.log(dados.status);
+      setModalEditar(false);
+    } catch (error) {
+      console.error('Erro ao carregar perfis:', error);
+    }
+
+    // Atualiza o array de usuários para refletir imediatamente na tabela
+    setUsuarios(prevUsuarios =>
+      prevUsuarios.map(u =>
+        u.matricula === dados.matricula
+          ? { ...u, email: dados.email, rolecodigo: dados.rolecodigo, status: dados.status }
+          : u
+      )
+    );
 
     // Fechar modal e limpar campo
     setModalDeletar(false);
     setNomeConfirmacao("");
     setUsuarioSelecionado(null);
   };
+
+const togglePermissao = (usuario) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw new Error('Token não encontrado, faça login.');
+
+  // Alterna entre 'A' e 'I'
+  const novostatus = usuario.status === 'A' ? 'I' : 'A';
+
+  // Atualiza o estado do usuário selecionado
+  setUsuarioSelecionado(prev => ({ ...prev, status: novostatus }));
+};
 
   return (
     <main className="grid grid-cols-[220px_1fr] gap-4 h-screen">
@@ -110,6 +253,7 @@ const [matriculaImportar, setMatriculaImportar] = useState("");
           <div className="col-span-12 p-4 bg-white rounded shadow">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-2 md:mt-0 mb-5">
               <div className="flex gap-2">
+                {rolePermissao.find(p => p.permissao === SCREENS.CADASTRARUSUARIO && p.status === 'A') && (
                 <div className="flex gap-2">
                   <button
                     onClick={() => setModalCadastrar(true)}
@@ -123,7 +267,7 @@ const [matriculaImportar, setMatriculaImportar] = useState("");
                   >
                     Importar
                   </button>
-                </div>
+                </div>)}
               </div>
               <input
                 type="text"
@@ -153,7 +297,7 @@ const [matriculaImportar, setMatriculaImportar] = useState("");
                     <UserDesign
                       key={item.matricula}
                       funcionario={item.nome}
-                      situacao={item.situacao}
+                      situacao={item.status}
                       role={item.roleName}
                       email={item.email}
                       onEditar={() => { setUsuarioSelecionado(item); setModalEditar(true); }}
@@ -214,22 +358,21 @@ const [matriculaImportar, setMatriculaImportar] = useState("");
               <input
                 type="text"
                 defaultValue={usuarioSelecionado.nome}
+                disabled
                 className="w-full rounded px-3 py-2 text-sm border border-indigo-300 focus:outline-indigo-500"
               />
               <input
                 type="email"
-                defaultValue={usuarioSelecionado.email}
+                value={usuarioSelecionado.email}
+                // Cria uma cópia do objeto e atualizar o estado diretamente nele
+                onChange={e => setUsuarioSelecionado(prev => ({...prev,  email: e.target.value}))}
                 className="w-full rounded px-3 py-2 text-sm border border-indigo-300 focus:outline-indigo-500"
               />
             </div>
 
             <div className="flex justify-between items-center py-2">
               <span className="text-sm ">Situacao do usuario</span>
-              <button
-                className={`relative inline-flex h-6 w-11 items-center transition-colors ${usuarioSelecionado.status ? "bg-sky-500" : "bg-gray-300"}`}
-              >
-                <span className={`inline-block h-4 w-4 transform bg-white transition-transform ${usuarioSelecionado.status? "translate-x-6" : "translate-x-1"}`} />
-              </button>
+              <ItemPermissao p={usuarioSelecionado} toggle={togglePermissao} />
             </div>
 
             <select
@@ -254,7 +397,9 @@ const [matriculaImportar, setMatriculaImportar] = useState("");
               >
                 Cancelar
               </button>
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded">
+              <button 
+                onClick={() => handleUpdateUsuario()}
+                className="px-4 py-2 bg-indigo-600 text-white rounded">
                 Salvar
               </button>
             </div>
@@ -363,10 +508,7 @@ const [matriculaImportar, setMatriculaImportar] = useState("");
                 Cancelar
               </button>
               <button
-                onClick={() => {
-                  console.log("Cadastrando:", novoUsuario);
-                  setModalCadastrar(false);
-                }}
+                onClick={handleCadastrarUsuario}
                 className="px-4 py-2 bg-indigo-600 text-white rounded"
               >
                 Salvar
@@ -423,12 +565,54 @@ const [matriculaImportar, setMatriculaImportar] = useState("");
 export default Perfil;
 
 export const UserDesign = ({ funcionario, situacao, role, email, onEditar, onDeletar }) => {
+  // Variavel utilizada para gerenciar as permissoes do usuario
+  const [rolePermissao, setRolePermissao] = useState([]);
+
+  // Carregar todos os perfis
+  useEffect(() => {
+    const carregarRoles = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token não encontrado, faça login.');
+
+        // Rota de perfis da API
+        const resRoles = await Api.get('/Roles', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // Filtrando somente os perfis que estão ativos na rota.
+        const perfisAtivos = resRoles.data.perfis.filter(p => p.status === 'A');
+        
+        // Pega qual a role do usuario que esta no token
+        const decodedToken = jwtDecode(token);
+
+        // Atualiza os estados com os dados do token
+        const perfildefault = perfisAtivos.find(p => p.role === decodedToken.role);
+
+        // consulta as permissoes disponiveis do usuario
+        const resRolePerm = await Api.post(`/RolePermissao`, 
+          { rolename: perfildefault.role }, // corpo da requisição
+          { headers: { Authorization: `Bearer ${token}` } } // headers
+        );
+
+        // Retorna todas as permissões do perfil do usuario
+        const dataRolePerm = resRolePerm.data.permissoes;
+
+        // Seta todas as permissões da role do usuario.
+        setRolePermissao(dataRolePerm);
+      } catch (error) {
+        console.error('Erro ao carregar perfis:', error);
+      }
+    };
+    carregarRoles();
+  }, []);
+  
   return (
     <tr>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
           <div className="flex-shrink-0 h-10 w-10">
-            <img className="h-10 w-10 rounded-full" src="https://i.pravatar.cc/150?img=1" alt="" />
+            <img className="h-10 w-10 rounded-full" src={null} alt="" />
           </div>
           <div className="ml-4">
             <div className="text-sm font-medium text-gray-900">{funcionario}</div>
@@ -448,9 +632,18 @@ export const UserDesign = ({ funcionario, situacao, role, email, onEditar, onDel
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{role}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{email}</td>
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-        <button onClick={onEditar} className="text-indigo-600 hover:text-indigo-900">Editar</button>
-        <button onClick={onDeletar} className="ml-2 text-red-600 hover:text-red-900">Remover</button>
+        {rolePermissao.find(p => p.permissao === SCREENS.ALTERARUSUARIO && p.status === 'A') && (<button onClick={onEditar} className="text-indigo-600 hover:text-indigo-900">Editar</button>)}
+        {rolePermissao.find(p => p.permissao === SCREENS.REMOVERUSUARIO && p.status === 'A') && (<button onClick={onDeletar} className="ml-2 text-red-600 hover:text-red-900">Remover</button>)}
       </td>
     </tr>
   );
 };
+
+const ItemPermissao = ({ p, toggle }) => (
+      <button
+        onClick={() => toggle(p)}
+        className={`relative inline-flex h-6 w-11 items-center transition-colors ${p.status == 'A' ? "bg-sky-500" : "bg-gray-300"}`}
+      >
+        <span className={`inline-block h-4 w-4 transform bg-white transition-transform ${p.status == 'A' ? "translate-x-6" : "translate-x-1"}`} />
+      </button>
+);

@@ -28,7 +28,7 @@ export const NovoPedido = () => {
       const codusur = decodedToken.codusur;
 
       // Recupera do endpoint os dados referente a requisição do orçamento
-      const response = await Api.post(`/DBSync/importarpedido?numorca=${numorca}&codusur=${codusur}`, {}, { headers: { Authorization: `Bearer ${token}` } })
+      const response = await Api.get(`Importe?numorca=${numorca}&codusur=${codusur}`, { headers: { Authorization: `Bearer ${token}` } })
 
       // Insere no alerta de mensagem 
       const data = response.data;
