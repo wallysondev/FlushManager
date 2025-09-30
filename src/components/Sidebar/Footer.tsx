@@ -8,9 +8,6 @@ export const Footer = () => {
                     <p className='font-bold'>FlushManager</p>
                     <p className='text-stone-500'>By Wallyson Italo</p>
                 </div>
-                <button className='px-2 py-1.5 font-medium bg-stone-200 hover:bg-stone-300 transition-colors rounded'>
-                    Suporte
-                </button>
             </div>
         </div>
     );

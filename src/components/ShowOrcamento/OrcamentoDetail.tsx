@@ -203,7 +203,7 @@ export const OrcamentoDetail = ({ orcamento }) => {
                   <th className="font-semibold text-sm uppercase px-6 py-4">Preço Venda</th>
                   <th className="font-semibold text-sm uppercase px-6 py-4">Preço Tabela</th>
                   <th className="font-semibold text-sm uppercase px-6 py-4">Data</th>
-                  <th className="font-semibold text-sm uppercase px-6 py-4">Posição</th>
+                  <th className="font-semibold text-sm uppercase px-6 py-4">Acao</th>
                 </tr>
               </thead>
               <tbody>

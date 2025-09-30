@@ -182,8 +182,8 @@ export const Grid = () => {
           <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
             <div className='flex flex-col md:flex-row gap-2'>
               <Search value={searchTerm} onChange={setSearchTerm} />
-              <span className='py-2 px-5 mb-3 relative rounded flex items-center text-sm text-gray-700'>Data inicial:</span> <DateFilter value={startDate} onChange={setStartDate} />
-              <span className='py-2 px-5 mb-3 relative rounded flex items-center text-sm text-gray-700'>Data Final:</span> <DateFilter value={endDate} onChange={setEndDate} />
+              <span className='py-2 px-5 mb-3 rounded flex items-center text-sm text-gray-700'>Data inicial:</span> <DateFilter value={startDate} onChange={setStartDate} />
+              <span className='py-2 px-5 mb-3 rounded flex items-center text-sm text-gray-700'>Data Final:</span> <DateFilter value={endDate} onChange={setEndDate} />
             </div>
           </div>
     

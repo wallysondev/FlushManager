@@ -63,23 +63,23 @@ export default function BotaoFlutuante({onAction, status}) {
         <div className="flex flex-col gap-2 ">
           {rolePermissao.find(p => p.permissao === SCREENS.APROVARORCAMENTO && p.status === 'A') && status === 'P' && (<button 
             onClick={() => handleAction("A")}
-            className="bg-emerald-500 hover:bg-emerald-700 text-white px-4 py-2 shadow-lg flex items-center gap-2"
+            className="bg-emerald-500 hover:bg-emerald-700 text-white px-4 py-2 shadow-lg flex items-center gap-2 w-30"
           >
             <FaCheck /> Aprovar
           </button>)}
 
           {rolePermissao.find(p => p.permissao === SCREENS.REJEITARORCAMENTO && p.status === 'A') && status === 'P' &&  (<button 
             onClick={() => handleAction("R")}
-            className="bg-red-400 hover:bg-red-500 text-white px-4 py-2 shadow-lg flex items-center gap-2"
+            className="bg-red-400 hover:bg-red-500 text-white px-4 py-2 shadow-lg flex items-center gap-2 w-30"
           >
             <FaTimes /> Rejeitar
           </button>)}
 
           {rolePermissao.find(p => p.permissao === SCREENS.DESAPROVARORCAMENTO && p.status === 'A') && status != 'P'  && (<button 
             onClick={() => handleAction("P")}
-            className="bg-purple-400 hover:bg-purple-500 text-white px-4 py-2 shadow-lg flex items-center gap-2"
+            className="bg-purple-400 hover:bg-purple-500 text-white px-4 py-2 shadow-lg flex items-center gap-2 w-30"
           >
-            <FaTimes /> Desaprovar
+            <FaTimes /> Reaprovar
           </button>)}
         </div>
       )}
@@ -87,7 +87,7 @@ export default function BotaoFlutuante({onAction, status}) {
       {/* Botão principal que abre/fecha as opções */}
       <button
         onClick={() => setOpen(!open)}
-        className="bg-sky-600 hover:bg-sky-700 text-white px-6 py-2 shadow-lg flex items-center gap-2"
+        className="bg-sky-600 hover:bg-sky-700 text-white px-6 py-2 shadow-lg flex items-center gap-2 w-30"
       >
         {open ? <FaChevronDown /> : <FaChevronUp />}
         Ações

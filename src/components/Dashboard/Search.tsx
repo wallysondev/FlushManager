@@ -3,7 +3,7 @@ import { FiSearch } from 'react-icons/fi';
 
 export const Search = ({ value, onChange }) => {
     return (
-        <div className='bg-gray-50 px-5 mb-3 relative rounded flex items-center text-sm'>
+        <div className='bg-gray-50 px-5 mb-3 rounded flex items-center text-sm'>
             <FiSearch className='mr-2' />
             <input
                 type='text'

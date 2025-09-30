@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const DateFilter = ({ value, onChange}) => (
-  <div className='bg-gray-50 py-2 px-5 mb-3 relative rounded flex items-center text-sm'>
+  <div className='bg-gray-50 py-2 px-5 mb-3 rounded flex items-center text-sm'>
     <input
       type="date"
       value={value}
