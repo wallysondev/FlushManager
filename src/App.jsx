@@ -2,7 +2,6 @@ import React from 'react'
 import { Navigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/Login'
-import Importe from './pages/Importe'
 import Bancodepreco from './pages/Bancodepreco';
 import Arquivar from './pages/Arquivar';
 import Pendencias from './pages/Pendencias';
@@ -38,14 +37,6 @@ const router = createBrowserRouter([
       element: (
         <ProtectedRoute>
           <Home />
-        </ProtectedRoute>
-      )
-    },
-    {
-      path: '/Importe',
-      element: (
-        <ProtectedRoute>
-          <Importe />
         </ProtectedRoute>
       )
     },

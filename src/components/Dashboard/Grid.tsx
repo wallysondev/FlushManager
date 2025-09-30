@@ -5,6 +5,7 @@ import { Search } from './Search';
 import { DateFilter } from './DateFilter';
 import Api from '../../services/api';
 import { jwtDecode } from 'jwt-decode';
+import { SCREENS } from '../../utils/Permissoes'
 
 export const Grid = () => {
   const navigate = useNavigate();
@@ -12,6 +13,10 @@ export const Grid = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Modal para importar pedidos
+  const [modalImportar, setModalImportar] = useState(false);
+  const [pedidoConfirm, setPedidoConfirm] = useState("");
 
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,6 +55,48 @@ export const Grid = () => {
     fetchData();
   }, [codusur, token]);
 
+  // Variavel utilizada para gerenciar as permissoes do usuario
+  const [rolePermissao, setRolePermissao] = useState([]);
+
+  // Carregar todos os perfis
+  useEffect(() => {
+    const carregarRoles = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('Token não encontrado, faça login.');
+
+        // Rota de perfis da API
+        const resRoles = await Api.get('/Roles', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // Filtrando somente os perfis que estão ativos na rota.
+        const perfisAtivos = resRoles.data.perfis.filter(p => p.status === 'A');
+        
+        // Pega qual a role do usuario que esta no token
+        const decodedToken = jwtDecode(token);
+
+        // Atualiza os estados com os dados do token
+        const perfildefault = perfisAtivos.find(p => p.role === decodedToken.role);
+
+        // consulta as permissoes disponiveis do usuario
+        const resRolePerm = await Api.post(`/RolePermissao`, 
+          { rolename: perfildefault.role }, // corpo da requisição
+          { headers: { Authorization: `Bearer ${token}` } } // headers
+        );
+
+        // Retorna todas as permissões do perfil do usuario
+        const dataRolePerm = resRolePerm.data.permissoes;
+
+        // Seta todas as permissões da role do usuario.
+        setRolePermissao(dataRolePerm);
+      } catch (error) {
+        console.error('Erro ao carregar perfis:', error);
+      }
+    };
+    carregarRoles();
+  }, []);
+
   if (loading) return <div>Carregando...</div>;
   if (error) return <div className='col-span-12 p-4 bg-white rounded shadow'>{error}</div>;
 
@@ -76,52 +123,149 @@ export const Grid = () => {
     return `${day}/${month}/${year}`;
   }
 
+  const handleImportarPedido = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Token não encontrado, faça login.");
+
+      const decodedToken = jwtDecode(token);
+      const codusur = decodedToken.codusur;
+
+      const dados = {
+        numorca: pedidoConfirm,
+        codusur: codusur,
+      };
+
+      console.log(dados);
+
+      // Recupera do endpoint os dados referente a requisição do orçamento
+      const response = await Api.post(`/Importe`, dados, {headers: { Authorization: `Bearer ${token}` },});
+
+      // Insere no alerta de mensagem 
+      const data = response.data;
+
+      if (response.data.sucesso) {
+        console.log(data);
+
+        // Fecha o modal
+        setModalImportar(false);
+        setPedidoConfirm("");
+      } else {
+        console.error("Erro ao cadastrar:", response.data.mensagem);
+      }
+    } catch (error: any) {
+      if (error.response) {
+        // Insere no alerta de mensagem 
+        const data = error.response.data;
+        // Fecha o modal
+        setModalImportar(false);
+        setPedidoConfirm("");
+      }
+    }
+  };
+
   return (
     // Removi o <StatCards /> porque nao vi necessidade do resumo ainda 
-    <div className="bg-stone-50 p-6 space-y-4">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-        <div className="inline-flex items-center px-1 py-1 uppercase font-bold md:flex">
-          <span className="font-bold text-lg text-gray-700">Orçamentos importados</span>
+    <>
+      <div className="bg-stone-50 p-6 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div className="inline-flex items-center px-1 py-1 uppercase font-bold md:flex">
+            <span className="font-bold text-lg text-gray-700">Orçamentos importados</span>
+          </div>
+          {rolePermissao.find(p => p.permissao === SCREENS.IMPORTARPEDIDOS && p.status === 'A') && (<button 
+            className="text-xs font-semibold uppercase bg-sky-500 text-white py-2 px-5 mb-3 hover:bg-sky-700"
+            onClick={() => setModalImportar(true)}>
+            Importar Novo Orcamento
+          </button>)}
         </div>
+        <div className='col-span-12 p-4 bg-white shadow'>
+          <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
+            <div className='flex flex-col md:flex-row gap-2'>
+              <Search value={searchTerm} onChange={setSearchTerm} />
+              <span className='py-2 px-5 mb-3 relative rounded flex items-center text-sm text-gray-700'>Data inicial:</span> <DateFilter value={startDate} onChange={setStartDate} />
+              <span className='py-2 px-5 mb-3 relative rounded flex items-center text-sm text-gray-700'>Data Final:</span> <DateFilter value={endDate} onChange={setEndDate} />
+            </div>
+          </div>
+    
+          <table className='w-full table-auto md:table-fixed'>
+            <TableHead />
+            <tbody>
+              {filteredData.length > 0 ? (
+                filteredData.map((item, index) => (
+                  <TableRow
+                    key={index}
+                    numorca={item.numorca}
+                    cliente={item.cliente}
+                    cgc={item.cnpj}
+                    uf={item.estado}
+                    valor={item.vltotal}
+                    dtultcompra={formatDate(item.dtulpedido)}
+                    dtultorcamento={formatDate(item.data)}
+                    status={item.posicao}
+                    andamento = {item.aprovado}
+                  />
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={8} className="text-sm text-center py-4 text-gray-500">
+                    Nenhum orçamento encontrado.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>            
       </div>
-      <div className='col-span-12 p-4 bg-white shadow'>
-        <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-3'>
-          <div className='flex flex-col md:flex-row gap-2'>
-            <Search value={searchTerm} onChange={setSearchTerm} />
-            <span className='py-2 px-5 mb-3 relative rounded flex items-center text-sm text-gray-700'>Data inicial:</span> <DateFilter value={startDate} onChange={setStartDate} />
-            <span className='py-2 px-5 mb-3 relative rounded flex items-center text-sm text-gray-700'>Data Final:</span> <DateFilter value={endDate} onChange={setEndDate} />
+
+      {modalImportar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setModalImportar(false)}
+          />
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-lg p-6 w-96 shadow-lg z-10">
+            <h2 className="text-lg font-bold mb-4">Importar Orcamento</h2>
+            <p className="text-sm mb-4">O processo de importação de orcamento realiza a integração com o ERP <b>Winthor</b>, recuperando os dados e disponibilizando-os nesta aplicação.</p>
+
+              <input
+                type="text"
+                inputMode="numeric"   // abre teclado numérico em mobile
+                pattern="[0-9]*"      // força só números
+                className="w-full rounded px-3 py-2 text-sm border border-indigo-300 focus:outline-indigo-500 mb-4"
+                placeholder="Número do orcamento"
+                value={pedidoConfirm}
+                onChange={(e) => setPedidoConfirm(e.target.value.replace(/\D/, ""))}
+              />
+
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    setModalImportar(false);
+                    setPedidoConfirm("");
+                  }}
+                  className="px-4 py-2 bg-gray-200 rounded"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => { handleImportarPedido() }}
+                  disabled={pedidoConfirm.length < 1}
+                  className={`px-4 py-2  text-white rounded ${
+                  pedidoConfirm.length > 0
+                    ? "bg-lime-600 hover:bg-lime-700"
+                    : "bg-lime-300 cursor-not-allowed"
+                }`}
+                >
+                  Importar
+              </button>
+            </div>
           </div>
         </div>
-  
-        <table className='w-full table-auto md:table-fixed'>
-          <TableHead />
-          <tbody>
-            {filteredData.length > 0 ? (
-              filteredData.map((item, index) => (
-                <TableRow
-                  key={index}
-                  numorca={item.numorca}
-                  cliente={item.cliente}
-                  cgc={item.cnpj}
-                  uf={item.estado}
-                  valor={item.vltotal}
-                  dtultcompra={formatDate(item.dtulpedido)}
-                  dtultorcamento={formatDate(item.data)}
-                  status={item.posicao}
-                  andamento = {item.aprovado}
-                />
-              ))
-            ) : (
-              <tr>
-                <td colSpan={8} className="text-sm text-center py-4 text-gray-500">
-                  Nenhum orçamento encontrado.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>            
-    </div>
+      )}
+    </>
   )
 }
 

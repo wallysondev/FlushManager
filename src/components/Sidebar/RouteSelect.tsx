@@ -65,11 +65,7 @@ export const RouteSelect = () => {
         localStorage.removeItem("token");
         navigate("/Login");
     }
-
-    function PedidoImporte(){
-        navigate("/Importe");
-    }
-
+    
     function GoToHome(){
         navigate("/Home");
     }
@@ -92,16 +88,9 @@ export const RouteSelect = () => {
                 <Route 
                     Icon={FiHome} 
                     selected={location.pathname === "/Home"} 
-                    title="Resumo" 
+                    title="Principal" 
                     onClick={GoToHome} 
                     isPermitted={canAccess(SCREENS.RESUMO)}
-                />
-                <Route 
-                    Icon={AiOutlineImport} 
-                    selected={location.pathname === "/Importe"} 
-                    title="Importar Pedido" 
-                    onClick={PedidoImporte} 
-                    isPermitted={canAccess(SCREENS.IMPORTARPEDIDOS)}
                 />
                 <Route 
                     Icon={AiOutlineDollar } 
