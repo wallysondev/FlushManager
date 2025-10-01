@@ -155,14 +155,17 @@ function Permissao() {
 
   // Validação de permissões
   const isMesmoUsuario = roleSelecionada.role === logado.role;
-  
+
   // Permissões quando for o próprio usuário
   const podeAlterarProprio = isMesmoUsuario && isPermissao.some(r => r.permissao === SCREENS.ALTERARPERMISSAOATUAL && r.status === 'A');
 
   // Permissões quando for outro perfil
   const podeAlterarOutro = !isMesmoUsuario && isPermissao.some(r => r.permissao === SCREENS.ALTERARPERMISSAOPERFIL && r.status === 'A');
 
-  const podeAlterar = podeAlterarProprio || podeAlterarOutro;
+  // Hierarquia de nivel de acesso por perfil, se for acesso do jogador e
+  const IsHierarquia =  (podeAlterarProprio || podeAlterarOutro) && roleSelecionada.nivel <= logado.nivel;
+
+  const podeAlterar = (podeAlterarProprio || podeAlterarOutro) && IsHierarquia;
 
   return (
     <main className="grid grid-cols-[220px_1fr] gap-4 p-4 h-screen">
@@ -227,14 +230,14 @@ function Permissao() {
 export default Permissao;
 
 const ItemPermissao = ({ p, toggle, canEdit }) => {
+  console.log(p);
   return (
     <div className="flex flex-col p-3 bg-gray-50 ">
       <div className="flex items-center justify-between mb-1">
         <span className="text-gray-700 text-sm">{p.descricao}</span>
         <button
           onClick={() => canEdit && toggle(p.codigo)}
-          className={`relative inline-flex h-6 w-11 items-center transition-colors ${p.ativo ? "bg-sky-500" : "bg-gray-300"}`}
-        >
+          className={`relative inline-flex h-6 w-11 items-center transition-colors ${p.ativo ? "bg-sky-500" : p.valor !== 'A' ? "bg-red-400" : "bg-gray-300"}`}>
           <span className={`inline-block h-4 w-4 transform bg-white transition-transform ${p.ativo ? "translate-x-6" : "translate-x-1"}`} />
         </button>
       </div>

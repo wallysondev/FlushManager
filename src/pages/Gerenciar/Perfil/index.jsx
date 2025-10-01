@@ -15,6 +15,7 @@ function Perfil() {
 
   const [roleSelecionada, setRoleSelecionada] = useState(null);
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
+  const [perfilpadrao, setPerfilpadrao] = useState(null);
 
   const [nomeConfirmacao, setNomeConfirmacao] = useState("");
 
@@ -112,6 +113,7 @@ function Perfil() {
 
         // Atualiza os estados com os dados do token
         const perfildefault = perfisAtivos.find(p => p.role === decodedToken.role);
+        setPerfilpadrao(perfildefault);
 
         // consulta as permissoes disponiveis do usuario
         const resRolePerm = await Api.post(`/RolePermissao`, 
@@ -229,16 +231,16 @@ function Perfil() {
     setUsuarioSelecionado(null);
   };
 
-const togglePermissao = (usuario) => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('Token não encontrado, faça login.');
+  const togglePermissao = (usuario) => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token não encontrado, faça login.');
 
-  // Alterna entre 'A' e 'I'
-  const novostatus = usuario.status === 'A' ? 'I' : 'A';
+    // Alterna entre 'A' e 'I'
+    const novostatus = usuario.status === 'A' ? 'I' : 'A';
 
-  // Atualiza o estado do usuário selecionado
-  setUsuarioSelecionado(prev => ({ ...prev, status: novostatus }));
-};
+    // Atualiza o estado do usuário selecionado
+    setUsuarioSelecionado(prev => ({ ...prev, status: novostatus }));
+  };
 
   return (
     <main className="grid grid-cols-[220px_1fr] gap-4 h-screen">
@@ -378,14 +380,15 @@ const togglePermissao = (usuario) => {
               onChange={e => {
                 const selecionada = roles.find(r => r.codigo === Number(e.target.value));
                 setRoleSelecionada(selecionada);
-              }}
-            >
-              {roles.map(r => (
-                <option key={r.codigo} value={r.codigo}>
-                  {r.role}
-                </option>
+              }}>
+                
+              {roles.filter(r => perfilpadrao.nivel >= r.nivel).map(r => (
+                  <option key={r.codigo} value={r.codigo}>
+                    {r.role}
+                  </option>
               ))}
             </select>
+
 
             <div className="flex justify-end gap-2">
               <button
@@ -572,6 +575,14 @@ export const UserDesign = ({ usuario, onEditar, onDeletar }) => {
       try {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Token não encontrado, faça login.');
+        
+        // recupera o avatar de cada usuario do perfil
+        const res = await Api.get(`/Usuario/avatar/${usuario.matricula}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.data.sucesso && res.data.avatarBase64) {
+            setUseravatar(`data:image/png;base64,${res.data.avatarBase64}`);
+        }
 
         // Rota de perfis da API
         const resRoles = await Api.get('/Roles', {
