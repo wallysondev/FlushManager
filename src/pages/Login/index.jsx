@@ -1,6 +1,5 @@
 import {React, useState} from 'react'
 import { useNavigate } from 'react-router-dom';
-import logo from '../../assets/logo-shopodonto.svg';
 import './style.css';
 import { AlertHiFire } from '../../components/Toast/AlertHiFire';
 
@@ -51,10 +50,10 @@ function Login() {
     setAlertMessage(texto);
     setShowAlert(isVisible);
   }
-
+  // "w-full rounded px-3 py-2 text-sm border border-indigo-300 focus:outline-indigo-500 mb-4"
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="max-w-sm w-full bg-white rounded-xl shadow-lg p-8">
+      <div className="max-w-sm w-full bg-white shadow-lg p-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Painel de Acesso</h2>
         {showAlert && <AlertHiFire description={alertMessage} />}
         <form className="space-y-4" onSubmit={e => {e.preventDefault(); SubmitOK(); }}>
@@ -64,7 +63,8 @@ function Login() {
               type="text" 
               value={username}
               onChange={e => setUsername(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+              
+              className="w-full px-3 py-2 border border-sky-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all"
               placeholder="digite seu usuario"
             />
           </div>
@@ -75,28 +75,23 @@ function Login() {
               type="password" 
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+              className="w-full px-3 py-2 border border-sky-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-all"
               placeholder="••••••••"
             />
           </div>
 
           <div className="flex items-center justify-between">
             <label className="flex items-center">
-              <input type="checkbox" className=" border-gray-300 text-indigo-600 focus:ring-indigo-500"/>
+              <input type="checkbox" className=" border-gray-300 text-sky-600 focus:ring-sky-500"/>
               <span className="ml-2 text-sm text-gray-600">Lembrar-me</span>
             </label>
-            <a href="#" className="text-sm text-indigo-600 hover:text-indigo-500">Esqueceu a senha?</a>
+            <a href="#" className="text-sm text-sky-600 hover:text-sky-500">Esqueceu a senha?</a>
           </div>
 
-          <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition-colors" type='submit'>
+          <button className="w-full text-sm bg-sky-600 hover:bg-sky-700 text-white font-medium py-2.5 transition-colors" type='submit'>
             Acessar
           </button>
         </form>
-
-        <div className="mt-6 text-center text-sm text-gray-600">
-          Não tem uma conta? 
-          <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium"> Fale conosco</a>
-        </div>
       </div>
     </div>  
   )

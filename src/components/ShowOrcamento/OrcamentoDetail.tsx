@@ -29,9 +29,13 @@ export const OrcamentoDetail = ({ orcamento }) => {
       .filter(i => i.excluido !== "S")
       .reduce((acc, i) => acc + i.pvenda * i.quantia, 0);
 
+    const valorTabelaAtualizado = itens
+      .filter(i => i.excluido !== "S")
+      .reduce((acc, i) => acc + i.ptabela * i.quantia, 0);
+
     setCabecalho(prev => ({
       ...prev,
-      vltotal: valorTotalAtualizado
+      vltotal: valorTotalAtualizado, vltabela: valorTabelaAtualizado, vlatend: valorTotalAtualizado,
     }));
   }, [itens]);
 
@@ -153,7 +157,8 @@ export const OrcamentoDetail = ({ orcamento }) => {
 
   return (
     <>
-    <BotaoFlutuante onAction={(action) => AprovarOrcamento(action, cab.numorca)}  status = {cab.aprovado}/>
+    {/* Checa se o orcamento ainda nao foi sincronizado, assim ele exibe o botaao */}
+    {cab.sincronizado === 'N' && (<BotaoFlutuante onAction={(action) => AprovarOrcamento(action, cab.numorca)}  status = {cab.aprovado}/>)}
 
     <div className="rounded-xl min-h-screen">
       {/* Botão de retornar */}
@@ -188,6 +193,8 @@ export const OrcamentoDetail = ({ orcamento }) => {
             <div><strong>Valor de Entrada:</strong> R$ {cab.vlentrada.toFixed(2)}</div>
             <div><strong>% Desconto:</strong> {cab.perdesc.toFixed(2)}</div>
             <div><strong>Valor Total:</strong> R$ {cab.vltotal.toFixed(2)}</div>
+            <div><strong>Valor Tabela:</strong> R$ {cab.vltabela.toFixed(2)}</div>
+            <div><strong>Valor Atendido:</strong> R$ {cab.vlatend.toFixed(2)}</div>
           </div>
         </div>
 

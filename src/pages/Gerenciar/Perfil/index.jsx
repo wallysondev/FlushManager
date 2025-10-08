@@ -150,12 +150,8 @@ function Perfil() {
       });
 
       if (response.data.sucesso) {
-
-        console.log(response.data.usuario);
         // Atualiza a lista de usuários em tela
         setUsuarios((prev) => [...prev, response.data.usuario]);
-
-        console.log("Usuário cadastrado com sucesso:", response.data.mensagem);
 
         // Fecha modal e limpa campos
         setModalCadastrar(false);
@@ -210,7 +206,6 @@ function Perfil() {
       if (!token) throw new Error('Token não encontrado, faça login.');
 
       const response = await Api.put(`/Usuario`, dados, { headers: {Authorization: `Bearer ${token}`} });
-      console.log(dados.status);
       setModalEditar(false);
     } catch (error) {
       console.error('Erro ao carregar perfis:', error);
@@ -229,6 +224,48 @@ function Perfil() {
     setModalDeletar(false);
     setNomeConfirmacao("");
     setUsuarioSelecionado(null);
+  };
+
+  const handleImportarUsuario = async () => {
+    const dados = {
+      matricula: matriculaImportar
+    };
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Token não encontrado, faça login.');
+
+      const response = await Api.post(`/Usuario/sincronizar`, dados, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const data = response.data.usuario;
+      if (!data) throw new Error('Não foi encontrada nenhuma resposta da API');
+
+      // Atualiza o array de usuários na tabela
+      setUsuarios(prevUsuarios => {
+        const usuarioExistente = prevUsuarios.find(u => u.matricula === data.matricula);
+        if (usuarioExistente) {
+          // Atualiza o usuário existente
+          return prevUsuarios.map(u =>
+            u.matricula === data.matricula
+              ? { ...u, email: data.email, rolecodigo: data.rolecodigo, status: data.status }
+              : u
+          );
+        } else {
+          // Adiciona o novo usuário se ainda não estiver na lista
+          return [...prevUsuarios, data];
+        }
+      });
+
+      // Fechar modal e limpar campos
+      setModalImportar(false);
+      setMatriculaImportar("");
+      setUsuarioSelecionado(null);
+
+    } catch (error) {
+      console.error('Erro ao importar usuário:', error);
+    }
   };
 
   const togglePermissao = (usuario) => {
@@ -546,10 +583,7 @@ function Perfil() {
                 Cancelar
               </button>
               <button
-                onClick={() => {
-                  console.log("Importando matrícula:", matriculaImportar);
-                  setModalImportar(false);
-                }}
+                onClick={() => handleImportarUsuario()}
                 className="px-4 py-2 bg-lime-600 text-white rounded"
               >
                 Importar
@@ -567,7 +601,7 @@ export default Perfil;
 export const UserDesign = ({ usuario, onEditar, onDeletar }) => {
   // Variavel utilizada para gerenciar as permissoes do usuario
   const [rolePermissao, setRolePermissao] = useState([]);
-  const [useravatar, setUseravatar] = useState('http://localhost:5173/src/assets/logo-shopodonto.svg');
+  const [useravatar, setUseravatar] = useState('/logo-shopodonto.svg');
 
   // Carregar todos os perfis
   useEffect(() => {

@@ -70,7 +70,7 @@ export function DropdownOpcoes({ numorca }) {
   }
 
   function handleLink() {
-    const novoLink = `${window.location.origin}/Detalhes/${numorca}`;
+    const novoLink = `${import.meta.env.VITE_SITE_URL}/Detalhes/${numorca}`;
     setLink(novoLink);
     setModalOpen(true);
     setOpen(false);

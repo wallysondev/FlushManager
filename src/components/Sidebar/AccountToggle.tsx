@@ -11,7 +11,7 @@ export const AccountToggle = () => {
     const [matricula, setMatricula] = useState<number | null>(null);
 
     // Para atualizar os dados do usuario 
-    const [useravatar, setUseravatar] = useState('http://localhost:5173/src/assets/logo-shopodonto.svg');
+    const [useravatar, setUseravatar] = useState('/logo-shopodonto.svg');
     const [preview, setPreview] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);

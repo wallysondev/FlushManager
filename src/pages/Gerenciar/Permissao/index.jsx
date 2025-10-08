@@ -230,7 +230,6 @@ function Permissao() {
 export default Permissao;
 
 const ItemPermissao = ({ p, toggle, canEdit }) => {
-  console.log(p);
   return (
     <div className="flex flex-col p-3 bg-gray-50 ">
       <div className="flex items-center justify-between mb-1">

@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import './style.css';
 import { Sidebar } from '../../components/Sidebar/Sidebar';
 import { OrcamentoDetail } from '../../components/ShowOrcamento/OrcamentoDetail';
+import Api from '../../services/api';
 
 function VisualizarOrcamento() {
   const { numorca } = useParams(); // pega o parâmetro da URL
@@ -23,25 +24,23 @@ useEffect(() => {
       if (!token) throw new Error('Token não encontrado, faça login.');
 
       // Buscar orçamento
-      const res = await fetch(`http://localhost:7296/api/Orcamento/${numorca}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await Api.get(`/Orcamento/${numorca}`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      if (!res.ok) throw new Error(`Erro ao buscar orçamento: ${res.statusText}`);
-      const data = await res.json();
+
+      const data = response.data;
       if (!data.cabecalho) throw new Error('Orçamento não encontrado.');
       
       // Itens do orcamento
       const Itens = data.itens;
 
       // Buscar todos os produtos que temos no sistema
-      const resProd = await fetch(`http://localhost:7296/api/produto`, {
+      const resProd= await Api.get(`/produto`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      // valida se tivemos um retorno possitivo do backend
-      if (!resProd.ok) throw new Error('Erro ao buscar produtos.');
-      
+
       // armazena na variavel o retorno do backend
-      const produtosJson = await resProd.json();
+      const produtosJson = resProd.data;
 
       // verifica se nesse retorno os detalhes que seriam os produtos vieram no retorno
       if (!produtosJson.produtos) throw new Error('Lista de produtos não encontrada.');
