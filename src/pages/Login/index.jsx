@@ -50,6 +50,7 @@ function Login() {
     setAlertMessage(texto);
     setShowAlert(isVisible);
   }
+
   // "w-full rounded px-3 py-2 text-sm border border-indigo-300 focus:outline-indigo-500 mb-4"
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">

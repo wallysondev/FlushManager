@@ -77,9 +77,15 @@ export function DropdownOpcoes({ numorca }) {
   }
 
   function copiarLink() {
-    navigator.clipboard.writeText(link);
-    setModalOpen(false);
-    setOpen(false);
+    const texto = link || `${import.meta.env.VITE_SITE_URL}/Detalhes/${numorca}`;
+
+    navigator.clipboard.writeText(texto)
+      .then(() => {
+        console.log("Link copiado:", texto);
+        setModalOpen(false);
+        setOpen(false);
+      })
+      .catch(err => console.error("Erro ao copiar:", err));
   }
 
   function handleEnviar() {
