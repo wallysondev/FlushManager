@@ -189,6 +189,13 @@ export const OrcamentoDetail = ({ orcamento }) => {
             <div><strong>Cód. Plano Pagamento:</strong> {cab.codplpag}</div>
             <div><strong>Observação:</strong> {cab.obs}</div>
           </div>
+
+          {orcamento.observacao && (
+            <div className="ml-auto grid grid-cols-1 gap-1 text-left">
+              <div className='text-red-500'><strong>Observações do cliente:</strong> {obs}</div>
+            </div>)
+          }
+          
           <div className="ml-auto grid grid-cols-1 gap-1 text-right">
             <div><strong>Valor de Entrada:</strong> R$ {cab.vlentrada.toFixed(2)}</div>
             <div><strong>% Desconto:</strong> {cab.perdesc.toFixed(2)}</div>

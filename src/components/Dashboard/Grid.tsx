@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BsArrowRepeat, BsCheckLg  } from "react-icons/bs";
+import { BsArrowRepeat, BsCheckLg, BsExclamationSquareFill } from "react-icons/bs";
 
 import { useNavigate, Navigate } from 'react-router-dom';
 import { DropdownOpcoes } from '../Dashboard/DropdownOpcoes';
@@ -44,17 +44,48 @@ export const Grid = () => {
     async function fetchData() {
       try {
         setLoading(true);
-        const response = await Api.get(`/Orcamento`, {
+
+        // 1. Buscar orçamentos
+        const response = await Api.get('/Orcamento', {
           params: { codusur },
           headers: { Authorization: `Bearer ${token}` }
         });
-        setData(response.data.orcamentos || []);
+
+        const orcamentos = response.data.orcamentos || [];
+
+        // 2. Buscar observações para cada orçamento
+        const orcamentosComObs = await Promise.all(
+          orcamentos.map(async (orc) => {
+            try {
+              const obsResponse = await Api.get(`/Orcamento/obs/${orc.numorca}`, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+
+              return {
+                ...orc,
+                observacao: obsResponse.data.observacao || null
+              };
+
+            } catch {
+              // Se não tiver observação, retorna null
+              return {
+                ...orc,
+                observacao: null
+              };
+            }
+          })
+        );
+
+        // 3. Armazena tudo junto no estado
+        setData(orcamentosComObs);
+
       } catch (err) {
         setError(err.message || 'Erro ao carregar dados');
       } finally {
         setLoading(false);
       }
     }
+
     fetchData();
   }, [codusur, token]);
 
@@ -117,6 +148,8 @@ export const Grid = () => {
 
     return searchMatch && dateMatch;
   });
+
+  const hasObservacao = filteredData.some(item => item.observacao);
 
   function formatDate(dateString: string) {
     const date = new Date(dateString);
@@ -207,13 +240,13 @@ export const Grid = () => {
 
   const getPositionColor = (status) => {
     switch (status) {
-      case "P": return "bg-slate-600 hover:bg-slate-500";
-      case "M": return "bg-violet-600 hover:bg-violet-500";
-      case "B": return "bg-amber-600 hover:bg-amber-500";
-      case "C": return "bg-red-600 hover:bg-red-500";
-      case "F": return "bg-lime-600 hover:bg-lime-500";
-      case "L": return "bg-blue-600 hover:bg-blue-500";
-      default: return "bg-gray-400 hover:bg-gray-500";
+      case "P": return "bg-slate-500 hover:bg-slate-600";
+      case "M": return "bg-violet-500 hover:bg-violet-600";
+      case "B": return "bg-amber-500 hover:bg-amber-600";
+      case "C": return "bg-red-500 hover:bg-red-600";
+      case "F": return "bg-lime-500 hover:bg-lime-600";
+      case "L": return "bg-blue-500 hover:bg-blue-600";
+      default: return "bg-gray-500 hover:bg-gray-400";
     }
   };
 
@@ -262,6 +295,7 @@ export const Grid = () => {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data do Orçamento</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Posicao</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Andamento</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Alerta</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
                 {rolePermissao.find(p => p.permissao === SCREENS.SINCRONIZARNOWINTHOR && p.status === 'A') && (<th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sync</th>)}
               </tr>
@@ -301,12 +335,36 @@ export const Grid = () => {
                           {isandamento.label}
                         </button>
                       </td>
+                      {item.observacao ? (
+                        <td className="p-4">
+                          <div className="relative group inline-block">
+                            <button className="flex items-center gap-2 py-1 px-2 rounded-full text-yellow-400 font-medium hover:text-yellow-300">
+                              <BsExclamationSquareFill size={20} />
+                            </button>
+
+                            <div className="
+                              absolute left-1/2 -translate-x-1/2 -top-10
+                              hidden group-hover:flex
+                              bg-black/70 text-white text-sm px-3 py-1 rounded-lg
+                              whitespace-nowrap
+                              shadow-md
+                              items-center justify-center
+                            ">
+                              O cliente adicionou uma observação neste pedido.
+                            </div>
+                          </div>
+                        </td>
+                      ):(
+                        <td className="p-4"></td>
+                      )}
+
                       <td className="p-4 items-center justify-center">
                         <DropdownOpcoes numorca={item.numorca} />
                       </td>
+
                       {rolePermissao.find(p => p.permissao === SCREENS.SINCRONIZARNOWINTHOR && p.status === 'A') && (
                         <td className="p-4 ">
-                          <button onClick={() => { if (item.sincronizado === 'N') handleExportarPedido(item.numorca); }}  disabled= {sincronizandoId === item.numorca && item.sincronizado === 'N'} className= {`flex items-center gap-2 py-1 px-2 rounded-full text-white font-medium transition-colors ${sincronizandoId === item.numorca && item.sincronizado === 'N'? "bg-sky-500" : item.sincronizado === 'N'? "bg-amber-500 hover:bg-amber-600" : "bg-lime-500 hover:bg-lime-600" }`}>
+                          <button onClick={() => { if (item.sincronizado === 'N') handleExportarPedido(item.numorca); }}  disabled= {sincronizandoId === item.numorca && item.sincronizado === 'N'} className= {`flex items-center gap-2 py-1 px-2 rounded-full text-white font-medium transition-colors ${sincronizandoId === item.numorca && item.sincronizado === 'N'? "bg-sky-500" : item.sincronizado === 'N'? "bg-pink-600 hover:bg-pink-500" : "bg-lime-500 hover:bg-lime-600" }`}>
                             {item.sincronizado === 'N' ? (<BsArrowRepeat className={`text-lg transition-transform duration-500 ${sincronizandoId === item.numorca ? "animate-spin" : ""}`}/>) : (<BsCheckLg className={`text-lg`}/>) }
                           </button>
                         </td>

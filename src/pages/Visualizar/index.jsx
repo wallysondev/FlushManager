@@ -23,38 +23,55 @@ function VisualizarOrcamento() {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Token não encontrado, faça login.');
 
-        // Buscar orçamento
+        // 1 - Buscar orçamento
         const response = await Api.get(`/Orcamento/${numorca}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
         const data = response.data;
         if (!data.cabecalho) throw new Error('Orçamento não encontrado.');
-        
-        // Itens do orcamento
-        const Itens = data.itens;
 
-        // Buscar todos os produtos que temos no sistema
-        const resProd= await Api.get(`/produto`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+        // 2 - Buscar observação do pedido (tratando 404)
+        let observacao = null;
+        try {
+          const obsResponse = await Api.get(`/Orcamento/Obs/${numorca}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+
+          observacao = obsResponse.data?.observacao || null;
+
+        } catch (err) {
+          // Se a API retornou 404, continuar normalmente
+          if (err.response?.status === 404) {
+            observacao = null;
+          } else {
+            throw err; // outros erros devem ser tratados como erros reais
+          }
+        }
+
+        // 3 - Buscar todos os produtos
+        const resProd = await Api.get(`/produto`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
 
-        // armazena na variavel o retorno do backend
         const produtosJson = resProd.data;
-
-        // verifica se nesse retorno os detalhes que seriam os produtos vieram no retorno
         if (!produtosJson.produtos) throw new Error('Lista de produtos não encontrada.');
-        
-        // define a variavel produtos recebendo um array
         const produtos = produtosJson.produtos;
 
-        // faz a leitura de item por item do orcamento e adicionando na variavel a descricao que vem dos produtos
+        // 4 - Atualizar itens com descrição do produto
+        const Itens = data.itens;
         const itensAtualizados = Itens?.map(item => {
           const produto = produtos.find(p => p.codprod === item.codprod);
           return { ...item, descricao: produto ? produto.descricao : '' };
         }) || [];
 
-        setOrcamento({ ...data, itens: itensAtualizados });
+        // 5 - Agora adicionamos a OBS no objeto do orçamento
+        setOrcamento({ 
+          ...data, 
+          itens: itensAtualizados,
+          observacao: observacao
+        });
+
       } catch (err) {
         setError(err.message);
       } finally {
