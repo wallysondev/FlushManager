@@ -280,7 +280,7 @@ function Perfil() {
   };
 
   return (
-    <main className="grid grid-cols-[220px_1fr] gap-4 h-screen">
+    <main className="grid grid-cols-[220px_1fr] gap-4 p-4 h-screen">
       <Sidebar />
       <div className="bg-stone-50 p-6 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">

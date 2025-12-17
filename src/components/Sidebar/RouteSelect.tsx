@@ -109,7 +109,7 @@ export const RouteSelect = () => {
                 <Route 
                     Icon={AiFillTruck} 
                     selected={location.pathname === "/Pendencias"} 
-                    title="Gestão de Pendencias" 
+                    title="Controle de Pendencias" 
                     onClick={GoToPendencias} 
                     isPermitted={canAccess(SCREENS.GESTAODEPENDENCIAS)}
                 />
