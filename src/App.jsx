@@ -4,11 +4,12 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Bancodepreco from './pages/Bancodepreco';
 import Arquivar from './pages/Arquivar';
-import Pendencias from './pages/Pendencias';
 
 import VisualizarOrcamento from './pages/Visualizar';
 import Perfil from './pages/Gerenciar/Perfil';
 import Permissao from './pages/Gerenciar/Permissao';
+import Importados from './pages/Gestao/Importados';
+import Importar from './pages/Gestao/Importar';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute';
@@ -57,10 +58,18 @@ const router = createBrowserRouter([
       )
     },
     {
-      path: '/Pendencias',
+      path: '/Gestao/Importados',
       element: (
         <ProtectedRoute>
-          <Pendencias />
+          <Importados />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: '/Gestao/Importar',
+      element: (
+        <ProtectedRoute>
+          <Importar />
         </ProtectedRoute>
       )
     },

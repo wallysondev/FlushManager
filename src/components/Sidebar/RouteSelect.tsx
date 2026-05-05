@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { IconType } from 'react-icons';
-import { AiFillTruck, AiOutlineUpload  , AiOutlineImport, AiOutlineLogout, AiOutlineAntDesign, AiOutlineSolution, AiOutlineSnippets, AiOutlineDollar    } from "react-icons/ai";
+import { AiFillTruck, AiOutlineUpload  , AiOutlineImport, AiOutlineLogout, AiOutlineAntDesign, AiOutlineSolution, AiOutlineSnippets, AiOutlineDollar, AiOutlineFileExclamation, AiOutlineReconciliation  } from "react-icons/ai";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { FiHome } from 'react-icons/fi';
 import { jwtDecode } from 'jwt-decode';
@@ -79,7 +79,7 @@ export const RouteSelect = () => {
     }
 
     function GoToPendencias(){
-        navigate("/Pendencias");
+        navigate("/Gestao");
     }
 
     return (
@@ -106,12 +106,17 @@ export const RouteSelect = () => {
                     onClick={GoToArquivar} 
                     isPermitted={canAccess(SCREENS.ARQUIVAMENTO)}
                 />
-                <Route 
-                    Icon={AiFillTruck} 
-                    selected={location.pathname === "/Pendencias"} 
-                    title="Controle de Pendencias" 
-                    onClick={GoToPendencias} 
-                    isPermitted={canAccess(SCREENS.GESTAODEPENDENCIAS)}
+                <Route
+                    Icon={AiOutlineReconciliation } 
+                    selected={false} // você não precisa mais disso, será calculado dentro do Route
+                    title="Gestao de Pedidos"
+                    onClick={() => {}}
+                    isPermitted={canAccess(SCREENS.GESTAODEPENDENCIAS)} // permissão para ver o menu principal
+                    subRoutes={[
+                        { title: "Importados", path: "/Gestao/Importados", onClick: () => navigate("/Gestao/Importados"), Icon: AiOutlineFileExclamation, isPermitted: canAccess(SCREENS.GESTAODEPENDENCIAS)},
+                        { title: "Importar", path: "/Gestao/Importar", onClick: () => navigate("/Gestao/Importar"), Icon: AiOutlineImport,isPermitted: canAccess(SCREENS.GESTAODEPENDENCIAS)},
+                    ]}
+                    location={location} // passe location
                 />
                 <Route
                     Icon={AiOutlineAntDesign} 
