@@ -119,7 +119,7 @@ export const OrcamentoDetail = ({ orcamento }) => {
   }
 
   function GoToOrcamentos(){
-    navigate(`/Principal`);
+    navigate(`/Home`);
   }
 
   async function UpdateProduct(numorca, codprod, status, quantia) {
@@ -192,7 +192,7 @@ export const OrcamentoDetail = ({ orcamento }) => {
 
           {orcamento.observacao && (
             <div className="ml-auto grid grid-cols-1 gap-1 text-left">
-              <div className='text-red-500'><strong>Observações do cliente:</strong> {obs}</div>
+              <div className='text-red-500'><strong>Observações do cliente:</strong> {orcamento.observacao}</div>
             </div>)
           }
           
@@ -228,11 +228,11 @@ export const OrcamentoDetail = ({ orcamento }) => {
                       <tr key={index} className={isExcluido ? "line-through text-gray-400" : ""}>
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-3">
-                            <div className="inline-flex w-10 h-10">
+                            <div className="inline-flex w-20 h-20">
                               <img 
-                                className='w-10 h-10 object-cover rounded-full' 
-                                alt={item.imagem} 
-                                src={`/imagens/produtos/${item.imagem}`} 
+                                className='w-20 h-20 object-cover rounded-full' 
+                                src={`/Imagens/Produtos/${item.codprod}.jpg`} 
+                                onError={(e) => { e.target.onerror = null; e.target.src = '/Imagens/default.png';}}
                               />
                             </div>
                             <div>
